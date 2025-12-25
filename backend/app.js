@@ -16,6 +16,8 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
+
 
 // routes
 app.use("/files", fileRoutes);

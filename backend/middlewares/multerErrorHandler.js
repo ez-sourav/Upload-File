@@ -5,7 +5,7 @@ module.exports = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
-        error: "File too large. Maximum size allowed is 2MB"
+        error: "File too large. Maximum size allowed is 20MB"
       });
     }
 
