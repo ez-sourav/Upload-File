@@ -1,67 +1,68 @@
 import { useState } from "react";
 import api from "../api/api";
+import UploadZone from "./UploadZone";
+import toast from "react-hot-toast";
 
-export default function UploadFile({ refresh }) {
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+export default function UploadFile({ onUploadSuccess }) {
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const uploadFile = async () => {
-    // reset messages
-    setError("");
-    setSuccess("");
-
-    if (!file) {
-      setError("❌ Upload failed. Please try again");
+  const uploadFiles = async () => {
+    if (selectedFiles.length === 0) {
+      toast.error("Please select at least one file");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setLoading(true);
 
     try {
-      setLoading(true);
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      await api.post("/files/upload", formData);
+        await api.post("/files/upload", formData);
+      }
 
-      setSuccess("✅ File uploaded successfully");
-      setFile(null);
-      refresh();
+      toast.success(
+  `${selectedFiles.length} file${
+    selectedFiles.length > 1 ? "s" : ""
+  } uploaded successfully`
+);
+      setSelectedFiles([]);
+      onUploadSuccess && onUploadSuccess();
     } catch (err) {
-  console.log("UPLOAD ERROR 👉", err);
-
-  console.log("RESPONSE 👉", err.response);
-  console.log("DATA 👉", err.response?.data);
-
-  setError(
-    err.response?.data?.error || "❌ Upload failed. Please try again"
-  );
-}
-finally {
+      toast.error(
+        err.response?.data?.error || "Upload failed. Please try again"
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ marginBottom: "25px" }}>
-      <h3>Upload File</h3>
+    <div className="bg-white shadow rounded-xl p-6 mb-8">
+      <h3 className="text-lg font-semibold mb-4">Upload Files</h3>
 
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+      <UploadZone
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
+        isUploading={loading}
+      />
 
-      <br />
-      <br />
-
-      <button onClick={uploadFile} disabled={loading}>
-        {loading ? "Uploading..." : "Upload"}
-      </button>
-
-      {/* ❌ Error Message */}
-      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
-
-      {/* ✅ Success Message */}
-      {success && (
-        <p style={{ color: "green", marginTop: "10px" }}>{success}</p>
+      {selectedFiles.length > 0 && (
+        <div className="mt-4 text-right">
+          <button
+            onClick={uploadFiles}
+            disabled={loading}
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm disabled:opacity-50"
+          >
+            {loading
+              ? "Uploading..."
+              : `Upload ${selectedFiles.length} file${
+                  selectedFiles.length > 1 ? "s" : ""
+                }`}
+          </button>
+        </div>
       )}
     </div>
   );
