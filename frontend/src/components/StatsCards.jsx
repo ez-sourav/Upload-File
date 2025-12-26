@@ -1,14 +1,15 @@
-import {
-  Files,
-  Image,
-  FileText,
-  HardDrive
-} from "lucide-react";
+import { Files, Image, FileText, HardDrive } from "lucide-react";
 
 export default function StatsCards({ files }) {
   const total = files.length;
-  const images = files.filter(f => f.fileType.startsWith("image")).length;
-  const pdfs = files.filter(f => f.fileType === "application/pdf").length;
+
+  const images = files.filter(
+    (f) => f.fileType?.startsWith("image/")
+  ).length;
+
+  const documents = files.filter(
+    (f) => !f.fileType?.startsWith("image/")
+  ).length;
 
   const totalSize = files.reduce((acc, f) => acc + (f.size || 0), 0);
 
@@ -21,7 +22,7 @@ export default function StatsCards({ files }) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
       <StatCard
         icon={Files}
         label="Total Files"
@@ -45,8 +46,8 @@ export default function StatsCards({ files }) {
 
       <StatCard
         icon={FileText}
-        label="PDFs"
-        value={pdfs}
+        label="Documents"
+        value={documents}
         iconColor="text-red-600"
       />
     </div>
@@ -55,16 +56,24 @@ export default function StatsCards({ files }) {
 
 function StatCard({ icon: Icon, label, value, iconColor }) {
   return (
-    <div className="bg-white rounded-xl shadow p-4 hover:shadow-md transition">
+    <div className="bg-white rounded-xl shadow p-3 md:p-4 hover:shadow-md transition">
       <div className="flex items-center gap-3">
+        
+        {/* ICON (LEFT) */}
         <div className={`p-2.5 rounded-lg bg-gray-100 ${iconColor}`}>
           <Icon className="h-5 w-5" />
         </div>
 
-        <div>
-          <p className="text-xl font-bold text-gray-900">{value}</p>
-          <p className="text-sm text-gray-500">{label}</p>
+        {/* TEXT (RIGHT) */}
+        <div className="flex flex-col">
+          <span className="text-lg md:text-xl font-semibold text-gray-900 leading-tight">
+            {value}
+          </span>
+          <span className="text-xs md:text-sm text-gray-500 leading-tight">
+            {label}
+          </span>
         </div>
+
       </div>
     </div>
   );

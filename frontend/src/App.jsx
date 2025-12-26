@@ -30,7 +30,7 @@ export default function App() {
     fetchFiles();
   }, []);
 
-  // Search filter (Lovable-style)
+  // Search filter
   const filteredFiles = useMemo(() => {
     if (!search.trim()) return files;
     return files.filter((file) =>
@@ -43,7 +43,7 @@ export default function App() {
       {/* Header */}
       <Header />
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 md:pt-24 py-6 md:py-8 space-y-6 md:space-y-8">
         {/* Stats Dashboard */}
         <StatsCards files={files} />
 
@@ -51,33 +51,43 @@ export default function App() {
         <UploadFile onUploadSuccess={fetchFiles} />
 
         {/* Files Section */}
-        <section className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">
+        <section className="space-y-3 md:space-y-4">
+          
+          {/* Title + Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            
+            <h2 className="text-base md:text-lg font-semibold">
               Your Files
               {filteredFiles.length !== files.length && (
-                <span className="ml-2 text-sm font-normal text-gray-500">
+                <span className="ml-2 text-xs md:text-sm font-normal text-gray-500">
                   ({filteredFiles.length} of {files.length})
                 </span>
               )}
             </h2>
 
             {/* Search */}
-            <div className="relative max-w-xs w-full">
+            <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="search"
                 placeholder="Search files..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300  bg-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="
+                  w-full pl-10 pr-3 py-2
+                  rounded-lg border border-gray-300
+                  bg-gray-100 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
               />
             </div>
           </div>
 
           {/* File list */}
           {loading ? (
-            <p className="text-gray-400 mt-6">Loading files...</p>
+            <p className="text-sm text-gray-400 mt-4">
+              Loading files...
+            </p>
           ) : (
             <FileList
               files={filteredFiles}

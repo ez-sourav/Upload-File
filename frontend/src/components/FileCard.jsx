@@ -15,8 +15,10 @@ export default function FileCard({ file, onDelete }) {
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef(null);
 
-  const isImage = file.fileType.startsWith("image");
+  // ---- FILE TYPE CHECKS (FIXED) ----
+  const isImage = file.fileType?.startsWith("image/");
   const isPdf = file.fileType === "application/pdf";
+  const isDocument = !isImage && !isPdf; // Word, Excel, etc.
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -47,6 +49,8 @@ export default function FileCard({ file, onDelete }) {
           <div className="flex items-center justify-center h-full">
             {isPdf ? (
               <FileText className="h-16 w-16 text-red-400" />
+            ) : isDocument ? (
+              <FileText className="h-16 w-16 text-purple-400" />
             ) : (
               <FileImage className="h-16 w-16 text-gray-400" />
             )}
@@ -55,19 +59,15 @@ export default function FileCard({ file, onDelete }) {
 
         {/* Hover Overlay */}
         <div
-          className=" hidden
-    md:flex
-    absolute inset-0 bg-black/60
-    opacity-0 md:group-hover:opacity-100
-    transition
-    items-center justify-center gap-3
-    z-10"
+          className="hidden md:flex absolute inset-0 bg-black/60
+          opacity-0 md:group-hover:opacity-100
+          transition items-center justify-center gap-3 z-10 "
         >
           <button
             onClick={() =>
               window.open(`http://localhost:3000/${file.path}`, "_blank")
             }
-            className="p-2.5 rounded-full bg-white hover:bg-gray-100"
+            className="p-2.5 rounded-full bg-white hover:cursor-pointer hover:bg-gray-100"
           >
             <Eye className="h-5 w-5" />
           </button>
@@ -81,7 +81,7 @@ export default function FileCard({ file, onDelete }) {
 
           <button
             onClick={() => onDelete(file._id)}
-            className="p-2.5 rounded-full bg-red-600 text-white hover:bg-red-700"
+            className="p-2.5 rounded-full bg-red-600 text-white hover:cursor-pointer hover:bg-red-700"
           >
             <Trash2 className="h-5 w-5" />
           </button>
@@ -90,16 +90,20 @@ export default function FileCard({ file, onDelete }) {
         {/* Badge */}
         <span
           className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${
-            isImage ? "bg-blue-100 text-blue-600" : "bg-red-100 text-red-600"
+            isImage
+              ? "bg-blue-100 text-blue-600"
+              : isPdf
+              ? "bg-red-100 text-red-600"
+              : "bg-purple-100 text-purple-600"
           }`}
         >
-          {isImage ? "Image" : "PDF"}
+          {isImage ? "Image" : isPdf ? "PDF" : "Document"}
         </span>
       </div>
 
       {/* Info */}
-      <div className="relative p-4 ">
-        <div className="flex justify-between items-start gap-2 ">
+      <div className="relative p-4">
+        <div className="flex justify-between items-start gap-2">
           <h3 className="font-medium truncate" title={file.originalName}>
             {file.originalName}
           </h3>
@@ -108,13 +112,13 @@ export default function FileCard({ file, onDelete }) {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded-md hover:cursor-pointer hover:bg-gray-100"
+              className="p-1 rounded-md hover:bg-gray-100 hover:cursor-pointer"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 bottom-full mb-2 w-36 bg-white  rounded-md shadow-lg z-50">
+              <div className="absolute right-0 bottom-full mb-2 w-36 bg-white rounded-md shadow-lg z-50">
                 <button
                   onClick={() =>
                     window.open(`http://localhost:3000/${file.path}`, "_blank")
@@ -126,14 +130,14 @@ export default function FileCard({ file, onDelete }) {
 
                 <a
                   href={`http://localhost:3000/files/download/${file._id}`}
-                  className="flex items-center gap-2 px-3 py-2 hover:cursor-pointer text-sm hover:bg-gray-100"
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:cursor-pointer hover:bg-gray-100"
                 >
                   <Download className="h-4 w-4" /> Download
                 </a>
 
                 <button
                   onClick={() => onDelete(file._id)}
-                  className="flex items-center gap-2 w-full px-3 py-2 hover:cursor-pointer text-sm text-red-600 hover:bg-red-50"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:cursor-pointer text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" /> Delete
                 </button>
