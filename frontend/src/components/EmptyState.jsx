@@ -12,7 +12,7 @@ export default function EmptyState() {
       </h3>
 
       <p className="text-gray-500 max-w-md">
-        Upload your first file using the upload zone above. Supports PDF
+        Upload your first file using the upload zone above. Supports all
         documents and images.
       </p>
     </div>
