@@ -10,15 +10,15 @@ import {
   HardDrive,
 } from "lucide-react";
 
-export default function FileCard({ file, onDelete }) {
+export default function FileCard({ file, onDelete, isLoading = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef(null);
 
-  // ---- FILE TYPE CHECKS (FIXED) ----
-  const isImage = file.fileType?.startsWith("image/");
-  const isPdf = file.fileType === "application/pdf";
-  const isDocument = !isImage && !isPdf; // Word, Excel, etc.
+  // ---- FILE TYPE CHECKS ----
+  const isImage = file?.fileType?.startsWith("image/");
+  const isPdf = file?.fileType === "application/pdf";
+  const isDocument = !isImage && !isPdf;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -34,15 +34,34 @@ export default function FileCard({ file, onDelete }) {
   const formatSize = (bytes) =>
     bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
 
+  
+    //  SKELETON LOADER
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl shadow animate-pulse">
+        <div className="aspect-4/3 bg-gray-200 rounded-t-xl" />
+        <div className="p-4 space-y-3">
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-3 bg-gray-200 rounded w-1/2" />
+          <div className="flex gap-4">
+            <div className="h-3 w-16 bg-gray-200 rounded" />
+            <div className="h-3 w-20 bg-gray-200 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative group bg-white rounded-xl shadow transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
       {/* Preview */}
-      <div className="relative aspect-4/3 bg-gray-100 overflow-hidden rounded-t-xl">
+      <div className="relative aspect-4/3 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden rounded-t-xl">
         {isImage && !imageError ? (
           <img
             src={`http://localhost:3000/${file.path}`}
             alt={file.originalName}
             onError={() => setImageError(true)}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -57,17 +76,13 @@ export default function FileCard({ file, onDelete }) {
           </div>
         )}
 
-        {/* Hover Overlay */}
-        <div
-          className="hidden md:flex absolute inset-0 bg-black/60
-          opacity-0 md:group-hover:opacity-100
-          transition items-center justify-center gap-3 z-10 "
-        >
+        {/* Overlay (VISIBLE ON MOBILE NOW) */}
+        <div className="flex absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-2 pb-4 z-10">
           <button
             onClick={() =>
               window.open(`http://localhost:3000/${file.path}`, "_blank")
             }
-            className="p-2.5 rounded-full bg-white hover:cursor-pointer hover:bg-gray-100"
+            className="p-2.5 rounded-full bg-white hover:bg-gray-100 hover:cursor-pointer"
           >
             <Eye className="h-5 w-5" />
           </button>
@@ -81,7 +96,7 @@ export default function FileCard({ file, onDelete }) {
 
           <button
             onClick={() => onDelete(file._id)}
-            className="p-2.5 rounded-full bg-red-600 text-white hover:cursor-pointer hover:bg-red-700"
+            className="p-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 hover:cursor-pointer"
           >
             <Trash2 className="h-5 w-5" />
           </button>
@@ -108,7 +123,7 @@ export default function FileCard({ file, onDelete }) {
             {file.originalName}
           </h3>
 
-          {/* 3-dot dropdown */}
+          {/* Dropdown */}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -118,28 +133,39 @@ export default function FileCard({ file, onDelete }) {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 bottom-full mb-2 w-36 bg-white rounded-md shadow-lg z-50">
+              <div className="absolute right-0 bottom-full mb-2 w-40 bg-white rounded-xl shadow-xl  z-50 overflow-hidden">
                 <button
-                  onClick={() =>
-                    window.open(`http://localhost:3000/${file.path}`, "_blank")
-                  }
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    window.open(
+                      `http://localhost:3000/${file.path}`,
+                      "_blank"
+                    );
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-gray-50"
                 >
-                  <Eye className="h-4 w-4" /> Preview
+                  <Eye className="h-4 w-4 text-blue-600" />
+                  Preview
                 </button>
 
                 <a
                   href={`http://localhost:3000/files/download/${file._id}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm hover:cursor-pointer hover:bg-gray-100"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50"
                 >
-                  <Download className="h-4 w-4" /> Download
+                  <Download className="h-4 w-4 text-green-600" />
+                  Download
                 </a>
 
                 <button
-                  onClick={() => onDelete(file._id)}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:cursor-pointer text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    onDelete(file._id);
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4" /> Delete
+                  <Trash2 className="h-4 w-4" />
+                  Delete
                 </button>
               </div>
             )}
