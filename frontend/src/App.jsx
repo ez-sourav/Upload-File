@@ -64,15 +64,11 @@ export default function App() {
     let result = files;
 
     if (filter === "image") {
-      result = result.filter((f) =>
-        f.fileType?.startsWith("image/")
-      );
+      result = result.filter((f) => f.fileType?.startsWith("image/"));
     }
 
     if (filter === "document") {
-      result = result.filter((f) =>
-        f.fileType?.startsWith("application/")
-      );
+      result = result.filter((f) => f.fileType?.startsWith("application/"));
     }
 
     if (filter === "recent") {
@@ -84,9 +80,7 @@ export default function App() {
 
     if (search.trim()) {
       result = result.filter((file) =>
-        file.originalName
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        file.originalName.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -115,7 +109,6 @@ export default function App() {
       <Header onMenuOpen={() => setIsMenuOpen(true)} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 md:pt-24 py-6 md:py-8 space-y-6 md:space-y-8">
-
         {/* ================= STATS ================= */}
         {showStats && (
           <section className="bg-white rounded-xl shadow p-4 md:p-6">
