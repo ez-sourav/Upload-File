@@ -65,7 +65,7 @@ export default function UploadFile({ onUploadSuccess }) {
               bg-blue-600 text-white
               px-4 md:px-5 py-2
               rounded-lg text-sm
-              disabled:opacity-50
+              disabled:opacity-50 hover:cursor-pointer
             "
           >
             {loading
