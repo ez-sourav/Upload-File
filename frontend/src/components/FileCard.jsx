@@ -17,7 +17,6 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
 
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
-
   // ---- FILE TYPE CHECKS ----
   const isImage = file?.fileType?.startsWith("image/");
   const isPdf = file?.fileType === "application/pdf";
@@ -50,14 +49,25 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
     );
   }
 
+  const downloadFile = () => {
+  const url = `http://localhost:3000/files/download/${file._id}`;
+  window.open(url, "_self");
+};
+
+const previewFile = () => {
+  window.open(file.fileUrl, "_blank");
+};
+
+const canPreview = isImage || isPdf;
+
+
   return (
     <div className="relative group bg-white rounded-lg md:rounded-xl shadow transition-all duration-300 hover:shadow-lg md:hover:scale-[1.02]">
-
       {/* ================= DESKTOP PREVIEW (UNCHANGED) ================= */}
       <div className="hidden md:block relative aspect-video md:aspect-4/3 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden rounded-t-lg md:rounded-t-xl">
         {isImage && !imageError ? (
           <img
-            src={`http://localhost:3000/${file.path}`}
+            src={file.fileUrl}
             alt={file.originalName}
             onError={() => setImageError(true)}
             loading="lazy"
@@ -78,20 +88,18 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
         {/* Hover Overlay */}
         <div className="hidden md:flex absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-2 pb-4 z-10">
           <button
-            onClick={() =>
-              window.open(`http://localhost:3000/${file.path}`, "_blank")
-            }
+            onClick={previewFile}
             className="p-2.5 bg-white rounded-full hover:bg-gray-100"
           >
             <Eye className="h-5 w-5" />
           </button>
 
-          <a
-            href={`http://localhost:3000/files/download/${file._id}`}
+          <button
+           onClick={downloadFile}
             className="p-2.5 bg-white rounded-full hover:bg-gray-100"
           >
             <Download className="h-5 w-5" />
-          </a>
+          </button>
 
           <button
             onClick={() => onDelete(file._id)}
@@ -117,10 +125,8 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
 
       {/* ================= INFO ================= */}
       <div className="relative px-3 py-2 md:p-4">
-
         {/* ---------- MOBILE LIST HEADER ---------- */}
         <div className="flex items-center gap-3 md:justify-between">
-
           {/* Left: Icon + Text */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Mobile icon */}
@@ -159,12 +165,12 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
           <div className="relative shrink-0" ref={menuRef}>
             <button
               onClick={() => {
-    if (window.innerWidth < 768) {
-      setMobileSheetOpen(true);   // 📱 mobile
-    } else {
-      setMenuOpen(!menuOpen);     // 🖥 desktop
-    }
-  }}
+                if (window.innerWidth < 768) {
+                  setMobileSheetOpen(true); // 📱 mobile
+                } else {
+                  setMenuOpen(!menuOpen); // 🖥 desktop
+                }
+              }}
               className="p-2 rounded-full hover:bg-gray-100 hover:cursor-pointer"
             >
               <MoreVertical className="h-5 w-5 text-gray-600" />
@@ -174,10 +180,7 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
               <div className="absolute right-0 bottom-full mt-2 w-36 md:w-40 bg-white rounded-xl shadow-xl z-50 overflow-hidden">
                 <button
                   onClick={() => {
-                    window.open(
-                      `http://localhost:3000/${file.path}`,
-                      "_blank"
-                    );
+                    previewFile();
                     setMenuOpen(false);
                   }}
                   className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:cursor-pointer hover:bg-gray-50"
@@ -186,14 +189,14 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
                   Preview
                 </button>
 
-                <a
-                  href={`http://localhost:3000/files/download/${file._id}`}
-                  onClick={() => setMenuOpen(false)}
+                <button
+                  onClick={() => {downloadFile(); setMobileSheetOpen(false);
+                  }}
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:cursor-pointer hover:bg-gray-50"
                 >
                   <Download className="h-4 w-4 text-green-600" />
                   Download
-                </a>
+                </button>
 
                 <button
                   onClick={() => {
@@ -228,59 +231,61 @@ export default function FileCard({ file, onDelete, isLoading = false }) {
       </div>
 
       {/* ================= MOBILE BOTTOM SHEET ================= */}
-{mobileSheetOpen && (
-  <div className="fixed inset-0 z-50 md:hidden">
-    {/* Backdrop */}
-    <div
-      className="absolute inset-0 bg-black/40"
-      onClick={() => setMobileSheetOpen(false)}
-    />
+      {mobileSheetOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileSheetOpen(false)}
+          />
 
-    {/* Bottom Sheet */}
-    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl animate-slideUp">
-      <div className="p-4 space-y-2">
-        <button
-          onClick={() => {
-            window.open(`http://localhost:3000/${file.path}`, "_blank");
-            setMobileSheetOpen(false);
-          }}
-          className="w-full flex items-center gap-3 px-4 py-4 text-base hover:bg-gray-50 rounded-xl"
-        >
-          <Eye className="h-5 w-5 text-blue-600" />
-          Preview
-        </button>
+          {/* Bottom Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl animate-slideUp">
+            <div className="p-4 space-y-2">
+              <button
+                onClick={() => {
+                  previewFile();
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-4 text-base hover:bg-gray-50 rounded-xl"
+              >
+                <Eye className="h-5 w-5 text-blue-600" />
+                Preview
+              </button>
 
-        <a
-          href={`http://localhost:3000/files/download/${file._id}`}
-          onClick={() => setMobileSheetOpen(false)}
-          className="w-full flex items-center gap-3 px-4 py-4 text-base hover:bg-gray-50 rounded-xl"
-        >
-          <Download className="h-5 w-5 text-green-600" />
-          Download
-        </a>
+              <button
+                onClick={() => {
+                  downloadFile();
 
-        <button
-          onClick={() => {
-            onDelete(file._id);
-            setMobileSheetOpen(false);
-          }}
-          className="w-full flex items-center gap-3 px-4 py-4 text-base text-red-600 hover:bg-red-50 rounded-xl"
-        >
-          <Trash2 className="h-5 w-5" />
-          Delete
-        </button>
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-4 text-base hover:bg-gray-50 rounded-xl"
+              >
+                <Download className="h-5 w-5 text-green-600" />
+                Download
+              </button>
 
-        <button
-          onClick={() => setMobileSheetOpen(false)}
-          className="w-full px-4 py-4 text-base font-medium text-gray-600 hover:bg-gray-100 rounded-xl"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                onClick={() => {
+                  onDelete(file._id);
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-4 text-base text-red-600 hover:bg-red-50 rounded-xl"
+              >
+                <Trash2 className="h-5 w-5" />
+                Delete
+              </button>
 
+              <button
+                onClick={() => setMobileSheetOpen(false)}
+                className="w-full px-4 py-4 text-base font-medium text-gray-600 hover:bg-gray-100 rounded-xl"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
