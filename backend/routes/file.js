@@ -1,19 +1,20 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const axios = require("axios");
 const File = require("../models/file");
 const upload = require("../middlewares/upload");
+const cloudinary = require("../config/cloudinary");
+
 const router = express.Router();
 
-// Upload file
-
+// ================= UPLOAD =================
 router.post("/upload", upload.single("file"), async (req, res) => {
   const file = await File.create({
     originalName: req.file.originalname,
     fileName: req.file.filename,
     fileType: req.file.mimetype,
     size: req.file.size,
-    path: req.file.path,
+    fileUrl: req.file.path,        // Cloudinary URL
+    publicId: req.file.filename,   // EXACT public_id
   });
 
   res.json({
@@ -22,56 +23,48 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   });
 });
 
-//   get all files
-
+// ================= GET FILES =================
 router.get("/", async (req, res) => {
   const files = await File.find().sort({ createdAt: -1 });
   res.json(files);
 });
 
-//   download file
-
+// ================= DOWNLOAD (PDF FIX) =================
 router.get("/download/:id", async (req, res) => {
-  const file = await File.findById(req.params.id);
-  if (!file) return res.status(404).json({ message: "File not found" });
-
-  res.download(path.join(__dirname, "..", file.path), file.originalName);
-});
-
-//  delete file
-
-router.delete("/:id", async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: "File not found" });
 
-    if (!file) {
-      return res.status(404).json({
-        error: "File not found"
-      });
-    }
-
-    // Delete file from uploads folder (if exists)
-    const filePath = path.join(__dirname, "..", file.path);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    // Delete metadata from DB
-    await file.deleteOne();
-
-    res.json({
-      message: "File deleted successfully"
+    const response = await axios.get(file.fileUrl, {
+      responseType: "stream",
     });
 
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file.originalName}"`
+    );
+    res.setHeader("Content-Type", file.fileType);
+
+    response.data.pipe(res);
   } catch (err) {
-    console.error("DELETE ERROR 👉", err.message);
-
-    res.status(400).json({
-      error: "Failed to delete file"
-    });
+    console.error("DOWNLOAD ERROR:", err.message);
+    res.status(500).json({ error: "Download failed" });
   }
 });
 
+// ================= DELETE =================
+router.delete("/:id", async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: "File not found" });
+
+    await cloudinary.uploader.destroy(file.publicId);
+    await file.deleteOne();
+
+    res.json({ message: "File deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ error: "Failed to delete file" });
+  }
+});
 
 module.exports = router;
