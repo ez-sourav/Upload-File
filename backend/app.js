@@ -7,16 +7,15 @@ const multerErrorHandler = require("./middlewares/multerErrorHandler");
 
 const app = express();
 
-// ALLOW FRONTEND ORIGIN
+
+app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "DELETE"],
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "DELETE","OPTIONS"],
   })
 );
 
-app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 
 
 // routes
