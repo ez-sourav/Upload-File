@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "./api/api";
+import toast from "react-hot-toast";
 
 import Header from "./components/Header";
 import StatsCards from "./components/StatsCards";
 import UploadFile from "./components/UploadFile";
-import FileList from "./components/FileList";
+import FileList from "./components/file-list/FileList";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 
 import MobileMenu from "./components/mobile-menu/MobileMenu";
@@ -18,6 +19,12 @@ export default function App() {
   // Delete modal
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Bulk delete confirmation
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+
+  // Multi-select state
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // Navigation / filter
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -91,11 +98,41 @@ export default function App() {
   const handleConfirmDelete = async () => {
     try {
       setDeleting(true);
+
       await api.delete(`/files/${deleteId}`);
+
+      toast.success("Deleted 1 file successfully");
+
       setDeleteId(null);
       fetchFiles();
     } catch (err) {
+      toast.error("Failed to delete file");
       console.error("Delete failed", err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+
+    try {
+      setDeleting(true);
+
+      await Promise.all(selectedIds.map((id) => api.delete(`/files/${id}`)));
+
+      toast.success(
+        `Deleted ${selectedIds.length} file${
+          selectedIds.length > 1 ? "s" : ""
+        } successfully`
+      );
+
+      setSelectedIds([]);
+      setDeleteId(null);
+      fetchFiles();
+    } catch (err) {
+      toast.error("Failed to delete selected files");
+      console.error(err);
     } finally {
       setDeleting(false);
     }
@@ -133,15 +170,9 @@ export default function App() {
         {/* ================= FILE LIST ================= */}
         {(!showStats || isDesktop) && (
           <section className="space-y-3 md:space-y-4">
+            {/* Header + Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-              <h2 className="text-base md:text-lg font-semibold">
-                Your Files
-                {filteredFiles.length !== files.length && (
-                  <span className="ml-2 text-xs md:text-sm font-normal text-gray-500">
-                    ({filteredFiles.length} of {files.length})
-                  </span>
-                )}
-              </h2>
+              <h2 className="text-base md:text-lg font-semibold">Your Files</h2>
 
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -150,20 +181,47 @@ export default function App() {
                   placeholder="Search files..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="
-                    w-full pl-10 pr-3 py-2
-                    rounded-lg border border-gray-300
-                    bg-gray-100 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                  "
+                  className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 bg-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
+            {/* ✅ BULK ACTION BAR (ADD HERE) */}
+            {selectedIds.length > 0 && (
+              <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                <span className="text-sm font-medium text-blue-700">
+                  {selectedIds.length} selected
+                </span>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="text-sm text-gray-600 hover:underline"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => setShowBulkConfirm(true)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* File Grid */}
             <FileList
               files={filteredFiles}
-              onDelete={(id) => setDeleteId(id)}
+              onDelete={(id) => {
+                setShowBulkConfirm(true);
+                setDeleteId(id);
+              }}
               loading={loading}
+              selectedIds={selectedIds}
+              setSelectedIds={setSelectedIds}
+              isDesktop={isDesktop}
             />
           </section>
         )}
@@ -171,10 +229,18 @@ export default function App() {
 
       {/* ================= DELETE MODAL ================= */}
       <ConfirmDeleteModal
-        open={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleConfirmDelete}
+        open={showBulkConfirm}
+        onClose={() => setShowBulkConfirm(false)}
+        onConfirm={async () => {
+          if (deleteId) {
+            await handleConfirmDelete();
+          } else {
+            await handleBulkDelete();
+          }
+          setShowBulkConfirm(false);
+        }}
         loading={deleting}
+        count={selectedIds.length}
       />
 
       {/* ================= MOBILE MENU ================= */}
