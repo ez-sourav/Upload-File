@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
   res.json(files);
 });
 
-// ================= DOWNLOAD (PDF FIX) =================
+// ================= DOWNLOAD  =================
 router.get("/download/:id", async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
