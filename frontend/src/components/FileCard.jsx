@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   FileImage,
   FileText,
+  File,
+  FileArchive,
+  FileSpreadsheet,
   Download,
   Trash2,
   Eye,
@@ -9,7 +12,9 @@ import {
   Calendar,
   HardDrive,
 } from "lucide-react";
+
 import { Check } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function FileCard({
   file,
@@ -34,12 +39,21 @@ export default function FileCard({
   // ---- FILE TYPE CHECKS ----
   const isImage = file?.fileType?.startsWith("image/");
   const isPdf = file?.fileType === "application/pdf";
-  const isDocument = !isImage && !isPdf;
   const canPreview = isImage || isPdf;
 
-  const touchStartY = useRef(0);
-const touchCurrentY = useRef(0);
+  const fileName = file.originalName?.toLowerCase() || "";
 
+  const isWord = fileName.endsWith(".doc") || fileName.endsWith(".docx");
+
+  const isExcel = fileName.endsWith(".xls") || fileName.endsWith(".xlsx");
+
+  const isZip =
+    fileName.endsWith(".zip") ||
+    fileName.endsWith(".rar") ||
+    fileName.endsWith(".7z");
+
+  const touchStartY = useRef(0);
+  const touchCurrentY = useRef(0);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -60,8 +74,11 @@ const touchCurrentY = useRef(0);
     };
   }, []);
 
-  const formatSize = (bytes) =>
-    bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+  const formatSize = (bytes) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   const downloadFile = () => {
     const url = `http://localhost:3000/files/download/${file._id}`;
@@ -69,16 +86,20 @@ const touchCurrentY = useRef(0);
   };
 
   const previewFile = () => {
-    if (canPreview) {
-      window.open(file.fileUrl, "_blank");
+    if (!canPreview) {
+      toast.error("Preview available only for images and PDF files");
+
+      return;
     }
+
+    window.open(file.fileUrl, "_blank");
   };
 
   const handleTouchStart = () => {
     if (isDesktop) return;
 
     longPressTimer.current = setTimeout(() => {
-      onSelect?.(); 
+      onSelect?.();
     }, LONG_PRESS_DURATION);
   };
 
@@ -129,7 +150,7 @@ const touchCurrentY = useRef(0);
       }}
     >
       {/*  Desktop checkbox*/}
-     {isDesktop && (
+      {isDesktop && (
         <div
           className="absolute top-3 right-3 z-30 cursor-pointer"
           onClick={(e) => {
@@ -145,13 +166,10 @@ const touchCurrentY = useRef(0);
                   : "bg-white/90 backdrop-blur-sm border-gray-300 hover:border-blue-400 hover:bg-blue-50"
               }`}
           >
-            {isSelected && (
-              <Check className="h-4 w-4 text-white stroke-3" />
-            )}
+            {isSelected && <Check className="h-4 w-4 text-white stroke-3" />}
           </div>
         </div>
       )}
-
 
       {/* ================= DESKTOP PREVIEW ================= */}
       <div className="hidden md:block relative h-32 bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden rounded-t-lg md:rounded-t-xl">
@@ -166,11 +184,15 @@ const touchCurrentY = useRef(0);
         ) : (
           <div className="flex items-center justify-center h-full">
             {isPdf ? (
-              <FileText className="h-12 w-12 text-red-400" />
-            ) : isDocument ? (
-              <FileText className="h-12 w-12 text-purple-400" />
+              <File className="h-12 w-12 text-red-500" />
+            ) : isWord ? (
+              <FileText className="h-12 w-12 text-blue-600" />
+            ) : isExcel ? (
+              <FileSpreadsheet className="h-12 w-12 text-green-600" />
+            ) : isZip ? (
+              <FileArchive className="h-12 w-12 text-yellow-500" />
             ) : (
-              <FileImage className="h-12 w-12 text-gray-400" />
+              <FileText className="h-12 w-12 text-purple-400" />
             )}
           </div>
         )}
@@ -180,9 +202,20 @@ const touchCurrentY = useRef(0);
           <div className="hidden md:flex absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-2 pb-4 z-10 ">
             <button
               onClick={() => !isSelected && previewFile()}
-              className=" p-2 bg-white rounded-full shadow-sm hover:bg-gray-100"
+              disabled={!canPreview}
+              className={`p-2 rounded-full shadow-sm transition-all
+    ${
+      canPreview
+        ? "bg-white hover:bg-gray-100"
+        : "bg-gray-200 cursor-not-allowed"
+    }
+  `}
             >
-              <Eye className="h-4.5 w-4.5" />
+              <Eye
+                className={`h-4.5 w-4.5 ${
+                  canPreview ? "text-gray-700" : "text-gray-400"
+                }`}
+              />
             </button>
 
             <button
@@ -214,10 +247,26 @@ const touchCurrentY = useRef(0);
               ? "bg-blue-100 text-blue-600"
               : isPdf
               ? "bg-red-100 text-red-600"
-              : "bg-purple-100 text-purple-600"
+              : isWord
+              ? "bg-blue-100 text-blue-600"
+              : isExcel
+              ? "bg-green-100 text-green-600"
+              : isZip
+              ? "bg-yellow-100 text-yellow-600"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
-          {isImage ? "Image" : isPdf ? "PDF" : "Document"}
+          {isImage
+            ? "Image"
+            : isPdf
+            ? "PDF"
+            : isWord
+            ? "Word"
+            : isExcel
+            ? "Excel"
+            : isZip
+            ? "ZIP"
+            : "File"}
         </span>
       </div>
 
@@ -227,11 +276,17 @@ const touchCurrentY = useRef(0);
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="md:hidden shrink-0">
               {isImage ? (
-                <FileImage className="h-9 w-9 text-red-400" />
+                <FileImage className="h-9 w-9 text-blue-500" />
               ) : isPdf ? (
-                <FileText className="h-9 w-9 text-red-400" />
+                <File className="h-9 w-9 text-red-500" />
+              ) : isWord ? (
+                <FileText className="h-9 w-9 text-blue-600" />
+              ) : isExcel ? (
+                <FileSpreadsheet className="h-9 w-9 text-green-600" />
+              ) : isZip ? (
+                <FileArchive className="h-9 w-9 text-yellow-500" />
               ) : (
-                <FileText className="h-9 w-9 text-purple-400" />
+                <FileText className="h-9 w-9 text-gray-400" />
               )}
             </div>
 
@@ -342,143 +397,158 @@ const touchCurrentY = useRef(0);
 
       {/* ================= MOBILE BOTTOM SHEET ================= */}
       {mobileSheetOpen && (
-  <div className="fixed inset-0 z-50 md:hidden">
-    {/* Backdrop */}
-    <div
-      className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-      onClick={() => setMobileSheetOpen(false)}
-    />
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileSheetOpen(false)}
+          />
 
-    {/* Bottom Sheet */}
-    <div
-      className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slideUp
+          {/* Bottom Sheet */}
+          <div
+            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slideUp
                  transition-transform will-change-transform"
-      onTouchStart={(e) => {
-        touchStartY.current = e.touches[0].clientY;
-      }}
-      onTouchMove={(e) => {
-        touchCurrentY.current = e.touches[0].clientY;
-      }}
-      onTouchEnd={() => {
-        const deltaY = touchCurrentY.current - touchStartY.current;
+            onTouchStart={(e) => {
+              touchStartY.current = e.touches[0].clientY;
+            }}
+            onTouchMove={(e) => {
+              touchCurrentY.current = e.touches[0].clientY;
+            }}
+            onTouchEnd={() => {
+              const deltaY = touchCurrentY.current - touchStartY.current;
 
-        // Swipe-down threshold
-        if (deltaY > 80) {
-          setMobileSheetOpen(false);
-        }
+              // Swipe-down threshold
+              if (deltaY > 80) {
+                setMobileSheetOpen(false);
+              }
 
-        touchStartY.current = 0;
-        touchCurrentY.current = 0;
-      }}
-    >
-      {/* Handle bar */}
-      <div className="flex justify-center pt-3 pb-2">
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-      </div>
+              touchStartY.current = 0;
+              touchCurrentY.current = 0;
+            }}
+          >
+            {/* Handle bar */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+            </div>
 
-      {/* File info header */}
-      <div className="px-5 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl">
-            {isImage ? (
-              <FileImage className="h-5 w-5 text-blue-600" />
-            ) : isPdf ? (
-              <FileText className="h-5 w-5 text-red-600" />
-            ) : (
-              <FileText className="h-5 w-5 text-purple-600" />
-            )}
-          </div>
+            {/* File info header */}
+            <div className="px-5 pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl">
+                  {isImage ? (
+                    <FileImage className="h-9 w-9 text-blue-500" />
+                  ) : isPdf ? (
+                    <File className="h-9 w-9 text-red-500" />
+                  ) : isWord ? (
+                    <FileText className="h-9 w-9 text-blue-600" />
+                  ) : isExcel ? (
+                    <FileSpreadsheet className="h-9 w-9 text-green-600" />
+                  ) : isZip ? (
+                    <FileArchive className="h-9 w-9 text-yellow-500" />
+                  ) : (
+                    <FileText className="h-9 w-9 text-gray-400" />
+                  )}
+                </div>
 
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 truncate text-sm">
-              {file.originalName}
-            </p>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {formatSize(file.size)}
-            </p>
-          </div>
-        </div>
-      </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate text-sm">
+                    {file.originalName}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {formatSize(file.size)}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-      {/* Actions */}
-      <div className="p-4 space-y-1.5">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            previewFile();
-            setMobileSheetOpen(false);
-          }}
-          disabled={hasSelection}
-          className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all
+            {/* Actions */}
+            <div className="p-4 space-y-1.5">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  previewFile();
+                  setMobileSheetOpen(false);
+                }}
+                disabled={hasSelection || !canPreview}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all
             ${
               hasSelection
                 ? "text-gray-400 cursor-not-allowed bg-gray-50"
                 : "text-gray-900 active:scale-[0.98] hover:bg-blue-50"
             }`}
-        >
-          <div className={`p-2 rounded-lg ${hasSelection ? "bg-gray-200" : "bg-blue-100"}`}>
-            <Eye className={`h-5 w-5 ${hasSelection ? "text-gray-400" : "text-blue-600"}`} />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="font-medium">Preview</p>
-            <p className="text-xs text-gray-500">View file content</p>
-          </div>
-        </button>
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    hasSelection ? "bg-gray-200" : "bg-blue-100"
+                  }`}
+                >
+                  <Eye
+                    className={`h-5 w-5 ${
+                      hasSelection ? "text-gray-400" : "text-blue-600"
+                    }`}
+                  />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium">Preview</p>
+                  <p className="text-xs text-gray-500">
+                    {canPreview ? "View file content" : "Preview not supported"}
+                  </p>
+                </div>
+              </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            downloadFile();
-            setMobileSheetOpen(false);
-          }}
-          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  downloadFile();
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
                      text-gray-900 active:scale-[0.98] hover:bg-green-50"
-        >
-          <div className="p-2 bg-green-100 rounded-lg">
-            <Download className="h-5 w-5 text-green-600" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="font-medium">Download</p>
-            <p className="text-xs text-gray-500">Save to device</p>
-          </div>
-        </button>
+              >
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Download className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium">Download</p>
+                  <p className="text-xs text-gray-500">Save to device</p>
+                </div>
+              </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(file._id);
-            setMobileSheetOpen(false);
-          }}
-          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(file._id);
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
                      text-red-600 active:scale-[0.98] hover:bg-red-50"
-        >
-          <div className="p-2 bg-red-100 rounded-lg">
-            <Trash2 className="h-5 w-5 text-red-600" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="font-medium">Delete</p>
-            <p className="text-xs text-red-400">Remove permanently</p>
-          </div>
-        </button>
-      </div>
+              >
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium">Delete</p>
+                  <p className="text-xs text-red-400">Remove permanently</p>
+                </div>
+              </button>
+            </div>
 
-      {/* Cancel */}
-      <div className="px-4 pb-6 pt-2">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setMobileSheetOpen(false);
-          }}
-          className="w-full px-4 py-3.5 font-semibold text-gray-700
+            {/* Cancel */}
+            <div className="px-4 pb-6 pt-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMobileSheetOpen(false);
+                }}
+                className="w-full px-4 py-3.5 font-semibold text-gray-700
                      bg-gray-100 hover:bg-gray-200 rounded-xl transition-all active:scale-[0.98]"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
