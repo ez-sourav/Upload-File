@@ -1,11 +1,12 @@
 // components/file-list/SelectionToolbar.jsx
-import { CheckSquare, Square, X } from "lucide-react";
+import { CheckSquare, Square, X, Trash2 } from "lucide-react";
 
 export default function SelectionToolbar({
   selectedCount,
   isAllSelected,
   onSelectAll,
   onClear,
+  onDelete,
 }) {
   return (
     <div className="sticky top-0 z-20 animate-slideDown">
@@ -40,17 +41,27 @@ export default function SelectionToolbar({
             </div>
           </div>
 
-          {/* Right: Clear Button */}
-          <button
-            onClick={onClear}
-            className="flex items-center gap-2 text-white/90 font-medium text-sm md:text-base transition-all hover:text-white hover:scale-105 active:scale-95"
-            aria-label="Clear selection"
-          >
-            <span className="hidden md:inline">Clear</span>
-            <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm transition-colors hover:bg-white/30">
-              <X className="h-4 w-4 md:h-5 md:w-5" />
-            </div>
-          </button>
+          {/* Right: Clear Button +Delete Btn */}
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3">
+            {/* Delete */}
+            <button
+              onClick={onDelete}
+              className="p-1.5 bg-red-500/90 rounded-lg hover:bg-red-600 transition-all"
+              aria-label="Delete selected"
+            >
+              <Trash2 className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            </button>
+
+            {/* Close */}
+            <button
+              onClick={onClear}
+              className="p-1.5 bg-white/20 rounded-lg hover:bg-white/30 transition-all"
+              aria-label="Clear selection"
+            >
+              <X className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Progress bar indicator */}

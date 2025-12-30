@@ -50,6 +50,7 @@ export default function FileList({
           isAllSelected={isAllSelected}
           onSelectAll={selectAll}
           onClear={clearSelection}
+           onDelete={() => onDelete(selectedIds)} 
         />
       )}
 
