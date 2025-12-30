@@ -224,7 +224,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* ✅ Search input (only when files exist) */}
+              {/*  Search input (only when files exist) */}
               {files.length > 0 && (
                 <div
                   className={`relative w-full sm:max-w-sm transition-all duration-200 ${
