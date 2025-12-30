@@ -1,10 +1,14 @@
 import { X, FileImage, FileText, Upload, Files, Home, Settings, HelpCircle, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import HelpModal from "./HelpModal";
+
 
 
 
 export default function MobileMenu({ open, onClose, setFilter }) {
   const [activeItem, setActiveItem] = useState("All Files");
+  const [showHelp, setShowHelp] = useState(false);
+
   
   useEffect(() => {
   if (open) {
@@ -41,6 +45,21 @@ export default function MobileMenu({ open, onClose, setFilter }) {
   setActiveItem(item.name);
   setFilter(item.filter);
   onClose();
+};
+
+const handleBottomItemClick = (item) => {
+  if (item.name === "Help") {
+    setShowHelp(true);
+    
+    return;
+  }
+
+  if (item.name === "Settings") {
+    // Future: open settings modal
+    // For now:
+    alert("Settings coming soon");
+    onClose();
+  }
 };
 
 
@@ -96,8 +115,10 @@ export default function MobileMenu({ open, onClose, setFilter }) {
                 key={item.name}
                 onClick={() => handleItemClick(item)}
                 className={`
-                  w-full flex items-center justify-between px-4 py-3.5 rounded-xl
-                  font-medium transition-all duration-200
+                 w-full flex items-center gap-3 px-4 py-3 rounded-xl
+    text-gray-700 font-medium text-sm
+    hover:bg-gray-100 active:bg-gray-200
+    transition-colors duration-200
                   ${
                     isActive
                       ? "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
@@ -140,26 +161,28 @@ export default function MobileMenu({ open, onClose, setFilter }) {
         <div className="border-t border-gray-200" />
 
         {/* Bottom menu items */}
-        <div className="px-4 py-3 space-y-1">
-          {bottomItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.name}
-                onClick={() => handleItemClick(item.name)}
-                className="
-                  w-full flex items-center gap-3 px-4 py-3 rounded-xl
-                  text-gray-700 font-medium text-sm
-                  hover:bg-gray-100 active:bg-gray-200
-                  transition-colors duration-200
-                "
-              >
-                <Icon className="h-4 w-4 text-gray-500" />
-                <span>{item.name}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Bottom menu items */}
+<div className="px-4 py-3 space-y-1">
+  {bottomItems.map((item) => {
+    const Icon = item.icon;
+    return (
+      <button
+        key={item.name}
+        onClick={() => handleBottomItemClick(item)}
+        className="
+          w-full flex items-center gap-3 px-4 py-3 rounded-xl
+          text-gray-700 font-medium text-sm
+          hover:bg-gray-100 active:bg-gray-200
+          transition-colors duration-200
+        "
+      >
+        <Icon className="h-4 w-4 text-gray-500" />
+        <span>{item.name}</span>
+      </button>
+    );
+  })}
+</div>
+
 
         {/* Footer with better styling */}
         <div className="px-4 py-4 border-t border-gray-200 bg-linear-to-r from-gray-50 to-gray-100">
@@ -173,6 +196,15 @@ export default function MobileMenu({ open, onClose, setFilter }) {
           </div>
         </div>
       </aside>
+      <HelpModal
+  open={showHelp}
+  onClose={() => {
+    setShowHelp(false);
+    onClose(); // close menu AFTER help closes
+  }}
+/>
+
+
     </>
   );
 }
