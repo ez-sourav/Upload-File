@@ -10,9 +10,8 @@ import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 
 import ScrollToTop from "./components/ScrollToTop";
 
-
 import MobileMenu from "./components/mobile-menu/MobileMenu";
-import { Search, X,ChevronDown  } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 import HelpModal from "./components/mobile-menu/HelpModal";
 
 export default function App() {
@@ -37,13 +36,12 @@ export default function App() {
 
   const [showHelp, setShowHelp] = useState(false);
 
-
   // Responsive state (IMPORTANT)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   // Scroll view More
   const FILES_PER_BATCH = 6;
-  
+
   const [visibleCount, setVisibleCount] = useState(FILES_PER_BATCH);
   const isExpanded = isDesktop && visibleCount > FILES_PER_BATCH;
   useEffect(() => {
@@ -68,11 +66,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-  const openHelp = () => setShowHelp(true);
-  window.addEventListener("open-help", openHelp);
-  return () => window.removeEventListener("open-help", openHelp);
-}, []);
-
+    const openHelp = () => setShowHelp(true);
+    window.addEventListener("open-help", openHelp);
+    return () => window.removeEventListener("open-help", openHelp);
+  }, []);
 
   // ================= HANDLE RESIZE =================
   useEffect(() => {
@@ -171,7 +168,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onMenuOpen={() => setIsMenuOpen(true)} hasFiles={files.length > 0} />
+      <Header
+        onMenuOpen={() => setIsMenuOpen(true)}
+        hasFiles={files.length > 0}
+      />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 md:pt-24 py-6 md:py-8 space-y-6 md:space-y-8">
         {/* ================= STATS ================= */}
@@ -196,56 +196,53 @@ export default function App() {
         </div>
 
         {/* ================= FILE LIST ================= */}
-{(!showStats || isDesktop) && (
-  <section className="space-y-3 md:space-y-4">
-    {/* Header + Search */}
-    <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+        {(!showStats || isDesktop) && (
+          <section className="space-y-3 md:space-y-4">
+            {/* Header + Search */}
+            <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+              {/* Title + Mobile Search Toggle */}
+              <div className="flex items-center justify-between sm:shrink-0">
+                <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+                  Your Files
+                </h2>
 
-      {/* Title + Mobile Search Toggle */}
-      <div className="flex items-center justify-between sm:shrink-0">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
-          Your Files
-        </h2>
+                {/*  Mobile search toggle (only when files exist) */}
+                {files.length > 0 && (
+                  <button
+                    onClick={() => setShowMobileSearch((prev) => !prev)}
+                    className="sm:hidden p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                    aria-label={
+                      showMobileSearch ? "Close search" : "Open search"
+                    }
+                  >
+                    {showMobileSearch ? (
+                      <X className="h-5 w-5 text-gray-600" />
+                    ) : (
+                      <Search className="h-5 w-5 text-gray-600" />
+                    )}
+                  </button>
+                )}
+              </div>
 
-        {/* ✅ Mobile search toggle (only when files exist) */}
-        {files.length > 0 && (
-          <button
-            onClick={() => setShowMobileSearch((prev) => !prev)}
-            className="sm:hidden p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
-            aria-label={showMobileSearch ? "Close search" : "Open search"}
-          >
-            {showMobileSearch ? (
-              <X className="h-5 w-5 text-gray-600" />
-            ) : (
-              <Search className="h-5 w-5 text-gray-600" />
-            )}
-          </button>
-        )}
-      </div>
-
-      {/* ✅ Search input (only when files exist) */}
-      {files.length > 0 && (
-        <div
-          className={`relative w-full sm:max-w-sm transition-all duration-200 ${
-            showMobileSearch ? "block" : "hidden sm:block"
-          }`}
-        >
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-          <input
-            type="search"
-            placeholder="Search files..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow hover:border-gray-300"
-            autoFocus={showMobileSearch}
-          />
-        </div>
-      )}
-
-    </div>
- 
-
-
+              {/* ✅ Search input (only when files exist) */}
+              {files.length > 0 && (
+                <div
+                  className={`relative w-full sm:max-w-sm transition-all duration-200 ${
+                    showMobileSearch ? "block" : "hidden sm:block"
+                  }`}
+                >
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                  <input
+                    type="search"
+                    placeholder="Search files..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow hover:border-gray-300"
+                    autoFocus={showMobileSearch}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* File Grid */}
             <FileList
@@ -264,46 +261,62 @@ export default function App() {
               isDesktop={isDesktop}
             />
 
-           {isDesktop && (
-  <div className="flex justify-center gap-4 pt-6 pb-2">
-    {/* View more */}
-    {visibleCount < filteredFiles.length && (
-      <button
-        onClick={() =>
-          setVisibleCount((prev) => prev + FILES_PER_BATCH)
-        }
-        className="inline-flex hover:cursor-pointer items-center gap-2 px-5 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors border border-blue-200"
-      >
-        <span>View more</span>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-    )}
+            {isDesktop && (
+              <div className="flex justify-center gap-4 pt-6 pb-2">
+                {/* View more */}
+                {visibleCount < filteredFiles.length && (
+                  <button
+                    onClick={() =>
+                      setVisibleCount((prev) => prev + FILES_PER_BATCH)
+                    }
+                    className="inline-flex hover:cursor-pointer items-center gap-2 px-5 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors border border-blue-200"
+                  >
+                    <span>View more</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                )}
 
-    {/* View less */}
-    {isExpanded && (
-      <button
-        onClick={() => setVisibleCount(FILES_PER_BATCH)}
-        className="inline-flex hover:cursor-pointer items-center gap-2 px-5 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors border border-gray-200"
-      >
-        <span>View less</span>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </button>
-    )}
-  </div>
-)}
-
+                {/* View less */}
+                {isExpanded && (
+                  <button
+                    onClick={() => setVisibleCount(FILES_PER_BATCH)}
+                    className="inline-flex hover:cursor-pointer items-center gap-2 px-5 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors border border-gray-200"
+                  >
+                    <span>View less</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 15l7-7 7 7"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
           </section>
         )}
       </main>
 
-      <HelpModal
-  open={showHelp}
-  onClose={() => setShowHelp(false)}
-/>
+      <HelpModal open={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* ================= DELETE MODAL ================= */}
       <ConfirmDeleteModal
@@ -330,9 +343,6 @@ export default function App() {
         />
       </div>
       <ScrollToTop />
-
-      
-      
     </div>
   );
 }
