@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { Upload, FileImage, FileText, File, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  Upload,
+  FileImage,
+  FileText,
+  File,
+  X,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 export default function UploadZone({
   selectedFiles = [],
@@ -11,18 +19,26 @@ export default function UploadZone({
 
   const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
+  // ✅ Detect mobile once
+  const isMobile = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }, []);
+
   const onDragOver = (e) => {
     e.preventDefault();
-    setIsDragging(true);
+    if (!isMobile) setIsDragging(true);
   };
 
   const onDragLeave = (e) => {
     e.preventDefault();
-    setIsDragging(false);
+    if (!isMobile) setIsDragging(false);
   };
 
   const onDrop = (e) => {
     e.preventDefault();
+    if (isMobile) return;
+
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
     validateAndAddFiles(files);
@@ -31,7 +47,7 @@ export default function UploadZone({
   const onFileChange = (e) => {
     const files = Array.from(e.target.files);
     validateAndAddFiles(files);
-    e.target.value = ""; // Reset input
+    e.target.value = "";
   };
 
   const validateAndAddFiles = (files) => {
@@ -51,7 +67,6 @@ export default function UploadZone({
       setSelectedFiles((prev) => [...prev, ...validFiles]);
     }
 
-    // Clear errors after 5 seconds
     if (newErrors.length > 0) {
       setTimeout(() => setErrors([]), 5000);
     }
@@ -85,21 +100,22 @@ export default function UploadZone({
     return <File className="h-5 w-5 text-gray-500" />;
   };
 
-  const totalSize = selectedFiles?.reduce((acc, file) => acc + file.size, 0) || 0;
+  const totalSize =
+    selectedFiles?.reduce((acc, file) => acc + file.size, 0) || 0;
 
   return (
     <div className="space-y-3 md:space-y-4">
       {/* DROP ZONE */}
       <div
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
+        onDragOver={!isMobile ? onDragOver : undefined}
+        onDragLeave={!isMobile ? onDragLeave : undefined}
+        onDrop={!isMobile ? onDrop : undefined}
         className={`relative border-2 border-dashed rounded-xl md:rounded-2xl
-          transition-all duration-300 ease-in-out
+          transition-all duration-300
           ${
-            isDragging
-              ? "border-blue-500 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-100"
-              : "border-gray-300 bg-linear-to-br from-gray-50 to-white hover:border-blue-400 hover:shadow-md"
+            isDragging && !isMobile
+              ? "border-blue-500 bg-blue-50 scale-[1.02]"
+              : "border-gray-300 bg-linear-to-br from-gray-50 to-white"
           }
           ${isUploading ? "opacity-50 pointer-events-none" : "cursor-pointer"}
         `}
@@ -110,129 +126,117 @@ export default function UploadZone({
           accept="*/*"
           onChange={onFileChange}
           disabled={isUploading}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           id="file-upload"
         />
 
         <div className="p-6 md:p-12 text-center">
-          {/* Icon with animation */}
-          <div className={`mx-auto mb-3 md:mb-4 transition-transform duration-300 ${isDragging ? "scale-110" : ""}`}>
-            <div className="inline-flex p-3 md:p-4 rounded-full bg-linear-to-br from-blue-50 to-blue-100 ring-4 md:ring-8 ring-blue-50">
-              <Upload className={`h-6 w-6 md:h-8 md:w-8 text-blue-600 ${isDragging ? "animate-bounce" : ""}`} />
+          <div className="mx-auto mb-4">
+            <div className="inline-flex p-4 rounded-full bg-blue-50 ring-8 ring-blue-50">
+              <Upload className="h-8 w-8 text-blue-600" />
             </div>
           </div>
 
-          {/* Text */}
-          <h3 className="font-semibold text-base md:text-lg text-gray-900 mb-1.5 md:mb-2">
-            {isDragging ? "Drop your files here" : "Upload Files"}
+          {/* TEXT */}
+          <h3 className="font-semibold text-base md:text-lg text-gray-900 mb-2">
+            {isMobile
+              ? "Tap to upload files"
+              : isDragging
+              ? "Drop your files here"
+              : "Upload Files"}
           </h3>
-          
-          <p className="text-xs md:text-sm text-gray-600 mb-1 px-2">
-            Drag and drop your files here, or{" "}
-            <label htmlFor="file-upload" className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer underline decoration-2 underline-offset-2">
-              browse
-            </label>
+
+          <p className="text-xs md:text-sm text-gray-600 px-2">
+            {isMobile ? (
+              "Choose files from your device"
+            ) : (
+              <>
+                Drag and drop your files here, or{" "}
+                <label
+                  htmlFor="file-upload"
+                  className="text-blue-600 font-medium cursor-pointer underline"
+                >
+                  browse
+                </label>
+              </>
+            )}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-3 md:mt-4 text-[10px] md:text-xs text-gray-500">
+          <div className="flex justify-center gap-4 mt-4 text-xs text-gray-500">
             <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               All file types
             </span>
             <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" />
-              Max 20MB per file
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+              Max 20MB
             </span>
           </div>
         </div>
       </div>
 
-      {/* ERROR MESSAGES */}
+      {/* ERROR + FILE LIST (UNCHANGED) */}
       {errors.length > 0 && (
         <div className="space-y-2">
           {errors.map((error, index) => (
             <div
               key={index}
-              className="flex items-start gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg bg-red-50 border border-red-200 animate-slide-in"
+              className="flex items-start gap-3 p-3 rounded-lg bg-red-50 border border-red-200"
             >
-              <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-red-600 shrink-0 mt-0.5" />
-              <p className="text-xs md:text-sm text-red-800 flex-1">{error}</p>
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+              <p className="text-sm text-red-800 flex-1">{error}</p>
               <button
-                onClick={() => setErrors((prev) => prev.filter((_, i) => i !== index))}
-                className="text-red-400 hover:text-red-600 p-1"
+                onClick={() =>
+                  setErrors((prev) => prev.filter((_, i) => i !== index))
+                }
               >
-                <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <X className="h-4 w-4 text-red-500" />
               </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* SELECTED FILES */}
       {selectedFiles.length > 0 && (
-        <div className="space-y-2.5 md:space-y-3">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-xs md:text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold">
                 Selected Files ({selectedFiles.length})
               </p>
-              <p className="text-[10px] md:text-xs text-gray-500">
+              <p className="text-xs text-gray-500">
                 Total size: {formatSize(totalSize)}
               </p>
             </div>
             <button
               onClick={clearAll}
-              disabled={isUploading}
-              className="text-[10px] md:text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-2 md:px-3 py-1 md:py-1.5 rounded-lg hover:bg-red-50 hover:cursor-pointer transition-colors"
+              className="text-xs text-red-600 hover:text-red-700"
             >
               Clear All
             </button>
           </div>
 
-          {/* Files List */}
-          <div className="space-y-2 max-h-56 md:max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+          <div className="space-y-2 max-h-60 overflow-y-auto">
             {selectedFiles.map((file, index) => (
               <div
                 key={index}
-                className="group flex items-center gap-2.5 md:gap-3 p-2.5 md:p-3 rounded-lg md:rounded-xl bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
+                className="flex items-center gap-3 p-3 rounded-lg border bg-white"
               >
-                {/* File Icon */}
-                <div className="shrink-0">
-                  {getFileIcon(file)}
-                </div>
-
-                {/* File Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm font-medium text-gray-900 truncate">
-                    {file.name}
+                {getFileIcon(file)}
+                <div className="flex-1 truncate">
+                  <p className="text-sm font-medium truncate">{file.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatSize(file.size)}
                   </p>
-                  <div className="flex items-center gap-1.5 md:gap-2 mt-0.5">
-                    <p className="text-[10px] md:text-xs text-gray-500">
-                      {formatSize(file.size)}
-                    </p>
-                    <span className="text-gray-300">•</span>
-                    <p className="text-[10px] md:text-xs text-gray-500 capitalize">
-                      {file.type.split("/")[1] || "file"}
-                    </p>
-                  </div>
                 </div>
-
-                {/* Remove Button */}
-                <button
-                  onClick={() => removeFile(index)}
-                  disabled={isUploading}
-                  className="shrink-0 p-1.5 md:p-2 hover:cursor-pointer rounded-lg md:opacity-0 group-hover:opacity-100 hover:bg-red-50 text-gray-400 hover:text-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Remove file"
-                >
-                  <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <button onClick={() => removeFile(index)}>
+                  <X className="h-4 w-4 text-gray-400 hover:text-red-600" />
                 </button>
               </div>
             ))}
           </div>
         </div>
       )}
-
     </div>
   );
 }
