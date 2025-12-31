@@ -4,22 +4,20 @@ const cors = require("cors");
 
 const fileRoutes = require("./routes/file");
 const multerErrorHandler = require("./middlewares/multerErrorHandler");
+const authRoutes = require("./routes/auth");
 
 const app = express();
-
 
 app.use(express.json());
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "DELETE","OPTIONS"],
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
   })
 );
 
-
-
-// routes
-app.use("/files", fileRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/files", fileRoutes); 
 
 app.use(multerErrorHandler);
 

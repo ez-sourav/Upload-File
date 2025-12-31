@@ -6,8 +6,16 @@ const fileSchema = new mongoose.Schema(
     fileName: String,
     fileType: String,
     size: Number,
+
     fileUrl: String,   // Cloudinary URL
     publicId: String,  // Cloudinary ID (for delete)
+
+    // 🔐 OWNER OF THE FILE
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );

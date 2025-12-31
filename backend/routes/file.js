@@ -3,11 +3,12 @@ const axios = require("axios");
 const File = require("../models/file");
 const upload = require("../middlewares/upload");
 const cloudinary = require("../config/cloudinary");
+const auth = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
 // ================= UPLOAD =================
-router.post("/upload", upload.single("file"), async (req, res) => {
+router.post("/upload",auth, upload.single("file"), async (req, res) => {
   const file = await File.create({
     originalName: req.file.originalname,
     fileName: req.file.filename,
@@ -15,6 +16,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     size: req.file.size,
     fileUrl: req.file.path,        // Cloudinary URL
     publicId: req.file.filename,   // EXACT public_id
+    user: req.userId, //logged in user
   });
 
   res.json({
@@ -24,15 +26,22 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 // ================= GET FILES =================
-router.get("/", async (req, res) => {
-  const files = await File.find().sort({ createdAt: -1 });
+router.get("/", auth, async (req, res) => {
+  const files = await File.find({ user: req.userId })
+    .sort({ createdAt: -1 });
+
   res.json(files);
 });
 
+
 // ================= DOWNLOAD  =================
-router.get("/download/:id", async (req, res) => {
+router.get("/download/:id",auth, async (req, res) => {
   try {
-    const file = await File.findById(req.params.id);
+    const file = await File.findOne({
+  _id: req.params.id,
+  user: req.userId,
+});
+
     if (!file) return res.status(404).json({ error: "File not found" });
 
     const response = await axios.get(file.fileUrl, {
@@ -53,10 +62,15 @@ router.get("/download/:id", async (req, res) => {
 });
 
 // ================= DELETE =================
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
-    const file = await File.findById(req.params.id);
-    if (!file) return res.status(404).json({ error: "File not found" });
+    const file = await File.findOne({
+      _id: req.params.id,
+      user: req.userId,
+    });
+
+    if (!file)
+      return res.status(404).json({ error: "File not found" });
 
     await cloudinary.uploader.destroy(file.publicId);
     await file.deleteOne();
@@ -66,5 +80,6 @@ router.delete("/:id", async (req, res) => {
     res.status(400).json({ error: "Failed to delete file" });
   }
 });
+
 
 module.exports = router;
