@@ -1,13 +1,17 @@
-import { X, FileImage, FileText, Upload, Files, Home, Settings, HelpCircle, ChevronRight } from "lucide-react";
+import { X, FileImage, FileText, Upload, Files, Home,  HelpCircle, ChevronRight, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import HelpModal from "./HelpModal";
-
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 export default function MobileMenu({ open, onClose, setFilter }) {
   const [activeItem, setActiveItem] = useState("All Files");
   const [showHelp, setShowHelp] = useState(false);
+
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   
   useEffect(() => {
@@ -37,7 +41,7 @@ export default function MobileMenu({ open, onClose, setFilter }) {
 
 
   const bottomItems = [
-    { name: "Settings", icon: Settings },
+   
     { name: "Help", icon: HelpCircle },
   ];
 
@@ -54,12 +58,7 @@ const handleBottomItemClick = (item) => {
     return;
   }
 
-  if (item.name === "Settings") {
-    // Future: open settings modal
-    // For now:
-    alert("Settings coming soon");
-    onClose();
-  }
+  
 };
 
 
@@ -115,10 +114,8 @@ const handleBottomItemClick = (item) => {
                 key={item.name}
                 onClick={() => handleItemClick(item)}
                 className={`
-                 w-full flex items-center gap-3 px-4 py-3 rounded-xl
-    text-gray-700 font-medium text-sm
-    hover:bg-gray-100 active:bg-gray-200
-    transition-colors duration-200
+                  w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl
+                  font-medium text-sm transition-all duration-200
                   ${
                     isActive
                       ? "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
@@ -161,28 +158,113 @@ const handleBottomItemClick = (item) => {
         <div className="border-t border-gray-200" />
 
         {/* Bottom menu items */}
-        {/* Bottom menu items */}
-<div className="px-4 py-3 space-y-1">
-  {bottomItems.map((item) => {
-    const Icon = item.icon;
-    return (
-      <button
-        key={item.name}
-        onClick={() => handleBottomItemClick(item)}
-        className="
-          w-full flex items-center gap-3 px-4 py-3 rounded-xl
-          text-gray-700 font-medium text-sm
-          hover:bg-gray-100 active:bg-gray-200
-          transition-colors duration-200
-        "
-      >
-        <Icon className="h-4 w-4 text-gray-500" />
-        <span>{item.name}</span>
-      </button>
-    );
-  })}
-</div>
+        <div className="px-4 py-3 space-y-1">
+          {bottomItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.name}
+                onClick={() => handleBottomItemClick(item)}
+                className="
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl
+                  text-gray-700 font-medium text-sm
+                  hover:bg-gray-100 active:bg-gray-200
+                  transition-colors duration-200
+                "
+              >
+                <Icon className="h-4 w-4 text-gray-500" />
+                <span>{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
 
+        {/* ================= ENHANCED AUTH (MOBILE) ================= */}
+        <div className="border-t border-gray-200 bg-linear-to-br from-gray-50 to-slate-50">
+          {!user ? (
+            <div className="px-4 py-4 space-y-2.5">
+              {/* Login Button */}
+              <button
+                onClick={() => {
+                  navigate("/login");
+                  onClose();
+                }}
+                className="
+                  w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl
+                  bg-linear-to-r from-blue-600 to-blue-500
+                  text-white font-semibold text-sm
+                  shadow-lg shadow-blue-500/25
+                  hover:shadow-xl hover:shadow-blue-500/30
+                  active:scale-[0.98]
+                  transition-all duration-200
+                "
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Login</span>
+              </button>
+
+              {/* Register Button */}
+              <button
+                onClick={() => {
+                  navigate("/register");
+                  onClose();
+                }}
+                className="
+                  w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl
+                  bg-linear-to-r from-green-600 to-emerald-500
+                  text-white font-semibold text-sm
+                  shadow-lg shadow-green-500/25
+                  hover:shadow-xl hover:shadow-green-500/30
+                  active:scale-[0.98]
+                  transition-all duration-200
+                "
+              >
+                <UserPlus className="h-4 w-4" />
+                <span>Create Account</span>
+              </button>
+            </div>
+          ) : (
+            <div className="px-4 py-4 space-y-3">
+              {/* User Info Card */}
+              <div className="px-4 py-3 rounded-xl bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white shadow-sm">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 mb-0.5">
+                      Logged in as
+                    </p>
+                    <p className="text-sm font-bold text-gray-900 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                  onClose();
+                }}
+                className="
+                  w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl
+                  bg-linear-to-r from-red-600 to-rose-500
+                  text-white font-semibold text-sm
+                  shadow-lg shadow-red-500/25
+                  hover:shadow-xl hover:shadow-red-500/30
+                  active:scale-[0.98]
+                  transition-all duration-200
+                "
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Footer with better styling */}
         <div className="px-4 py-4 border-t border-gray-200 bg-linear-to-r from-gray-50 to-gray-100">
@@ -196,15 +278,14 @@ const handleBottomItemClick = (item) => {
           </div>
         </div>
       </aside>
+      
       <HelpModal
-  open={showHelp}
-  onClose={() => {
-    setShowHelp(false);
-    onClose(); // close menu AFTER help closes
-  }}
-/>
-
-
+        open={showHelp}
+        onClose={() => {
+          setShowHelp(false);
+          onClose(); // close menu AFTER help closes
+        }}
+      />
     </>
   );
 }

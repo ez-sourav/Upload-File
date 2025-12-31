@@ -12,7 +12,12 @@ export default function HelpModal({ open, onClose }) {
       />
 
       {/* Bottom Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slideUp max-h-[85vh] overflow-y-auto">
+      <div className="absolute bottom-0 left-0 right-0
+    bg-white shadow-2xl animate-slideUp overflow-y-auto
+    h-screen sm:h-auto
+    sm:max-h-[85vh]
+    rounded-none sm:rounded-t-3xl">
+
         {/* Drag Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
