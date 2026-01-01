@@ -46,7 +46,7 @@ export default function Header({ onMenuOpen, hasFiles }) {
               <div className="p-2.5 bg-linear-to-br from-blue-600 to-indigo-500 rounded-xl shadow-lg shadow-blue-500/30">
                 <Upload className="h-5 w-5 text-white" strokeWidth={2.5} />
               </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:inline bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text">
+              <span className="text-xl font-bold text-gray-900  sm:inline bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text">
                 FileManager
               </span>
             </div>
@@ -197,6 +197,7 @@ export default function Header({ onMenuOpen, hasFiles }) {
             )}
           </div>
         </div>
+        
       </div>
     </header>
   );
