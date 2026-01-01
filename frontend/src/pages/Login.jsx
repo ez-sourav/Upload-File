@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2, LogIn } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 import api from "../api/api";
 
 export default function Login() {
@@ -10,9 +10,14 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const submit = async (e) => {
@@ -33,7 +38,7 @@ export default function Login() {
 
   const inputFields = [
     { name: "email", type: "email", placeholder: "you@example.com", label: "Email Address", icon: Mail },
-    { name: "password", type: "password", placeholder: "••••••••", label: "Password", icon: Lock }
+    { name: "password", type: showPassword ? "text" : "password", placeholder: "••••••••", label: "Password", icon: Lock, hasToggle: true }
   ];
 
   return (
@@ -77,7 +82,7 @@ export default function Login() {
           )}
 
           {/* Input Fields */}
-          {inputFields.map(({ name, type, placeholder, label, icon: Icon }, idx) => (
+          {inputFields.map(({ name, type, placeholder, label, icon: Icon, hasToggle }, idx) => (
             <div key={name} className={idx === inputFields.length - 1 ? "mb-5" : "mb-4"}>
               <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                 {label}
@@ -92,8 +97,21 @@ export default function Login() {
                   required
                   value={form[name]}
                   onChange={handleInputChange(name)}
-                  className="w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 bg-white text-sm"
+                  className={`w-full pl-10 ${hasToggle ? 'pr-10' : 'pr-3'} py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 bg-white text-sm`}
                 />
+                {hasToggle && (
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center hover:cursor-pointer hover:opacity-70 transition-opacity"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -124,7 +142,7 @@ export default function Login() {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-gray-50 text-gray-500 font-medium">
+              <span className="px-3 bg-white/80 text-gray-500 font-medium">
                 Don't have an account?
               </span>
             </div>

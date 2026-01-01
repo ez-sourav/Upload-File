@@ -140,18 +140,28 @@ export default function Home() {
   };
 
   const handleBulkDelete = async () => {
-    try {
-      setDeleting(true);
-      await Promise.all(selectedIds.map((id) => api.delete(`/files/${id}`)));
-      toast.success(`Deleted ${selectedIds.length} files successfully`);
-      setSelectedIds([]);
-      fetchFiles();
-    } catch {
-      toast.error("Failed to delete selected files");
-    } finally {
-      setDeleting(false);
-    }
-  };
+  const idsToDelete = [...new Set(selectedIds)]; 
+
+  // 🔥 VERY IMPORTANT: clear selection first
+  setSelectedIds([]);
+
+  try {
+    setDeleting(true);
+
+    await Promise.all(
+      idsToDelete.map((id) => api.delete(`/files/${id}`))
+    );
+
+    toast.success(`Deleted ${idsToDelete.length} files successfully`);
+    fetchFiles();
+  } catch (err) {
+    console.error("Bulk delete failed:", err);
+    toast.error("Failed to delete selected files");
+  } finally {
+    setDeleting(false);
+  }
+};
+
 
   // ================= VIEW =================
   const showStats = isDesktop || filter === "stats";

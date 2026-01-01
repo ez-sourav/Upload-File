@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import api from "../api/api";
 import toast from "react-hot-toast";
+import BottomSheet from "./BottomSheet";
+
 
 export default function FileCard({
   file,
@@ -426,37 +428,11 @@ export default function FileCard({
       </div>
 
       {/* ================= MOBILE BOTTOM SHEET ================= */}
-      {mobileSheetOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setMobileSheetOpen(false)}
-          />
-
-          {/* Bottom Sheet */}
-          <div
-            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl animate-slideUp"
-            onTouchStart={(e) => {
-              touchStartY.current = e.touches[0].clientY;
-            }}
-            onTouchMove={(e) => {
-              touchCurrentY.current = e.touches[0].clientY;
-            }}
-            onTouchEnd={() => {
-              const deltaY = touchCurrentY.current - touchStartY.current;
-              if (deltaY > 80) {
-                setMobileSheetOpen(false);
-              }
-              touchStartY.current = 0;
-              touchCurrentY.current = 0;
-            }}
-          >
-            {/* Handle bar */}
-            <div className="flex justify-center pt-4 pb-3">
-              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-            </div>
-
+      <BottomSheet
+  open={mobileSheetOpen}
+  onClose={() => setMobileSheetOpen(false)}
+>
+  
             {/* File info header */}
             <div className="px-5 pb-5 border-b border-gray-100">
               <div className="flex items-center gap-3">
@@ -577,9 +553,8 @@ export default function FileCard({
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      )}
+</BottomSheet>
+
     </div>
   );
 }
