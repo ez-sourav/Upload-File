@@ -17,7 +17,6 @@ import api from "../api/api";
 import toast from "react-hot-toast";
 import BottomSheet from "./BottomSheet";
 
-
 export default function FileCard({
   file,
   isDemo = false,
@@ -29,6 +28,39 @@ export default function FileCard({
   clearSelection,
   isDesktop,
 }) {
+ // ---- SKELETON ----
+if (isLoading) {
+  return (
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg overflow-hidden animate-pulse border border-gray-100">
+      
+      {/* Desktop preview skeleton */}
+      <div className="hidden md:block h-32 lg:h-40 bg-linear-to-br from-gray-200 to-gray-300" />
+
+      {/* Info skeleton */}
+      <div className="px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4">
+        <div className="flex items-center gap-3">
+          
+          {/* Mobile icon skeleton */}
+          <div className="md:hidden h-12 w-12 rounded-xl bg-gray-200 shrink-0" />
+
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-200 rounded-lg w-3/4" />
+            <div className="h-3 bg-gray-200 rounded-lg w-1/2 md:hidden" />
+          </div>
+        </div>
+
+        {/* Desktop meta skeleton */}
+        <div className="hidden md:flex mt-3 lg:mt-4 gap-3">
+          <div className="h-6 w-20 bg-gray-200 rounded-lg" />
+          <div className="h-6 w-24 bg-gray-200 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+  // ✅ Prevent crash if file is missing
   if (!file) return null;
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,14 +69,14 @@ export default function FileCard({
   const menuRef = useRef(null);
 
   const longPressTimer = useRef(null);
-  const LONG_PRESS_DURATION = 450; // ms
+  const LONG_PRESS_DURATION = 450;
 
   // ---- FILE TYPE CHECKS ----
   const isImage = file?.fileType?.startsWith("image/");
   const isPdf = file?.fileType === "application/pdf";
   const canPreview = isImage || isPdf;
 
-  const fileName = file.originalName?.toLowerCase() || "";
+  const fileName = file?.originalName?.toLowerCase() || "";
 
   const isWord = fileName.endsWith(".doc") || fileName.endsWith(".docx");
   const isExcel = fileName.endsWith(".xls") || fileName.endsWith(".xlsx");
@@ -52,9 +84,6 @@ export default function FileCard({
     fileName.endsWith(".zip") ||
     fileName.endsWith(".rar") ||
     fileName.endsWith(".7z");
-
-  const touchStartY = useRef(0);
-  const touchCurrentY = useRef(0);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -76,6 +105,7 @@ export default function FileCard({
   }, []);
 
   const formatSize = (bytes) => {
+    if (!bytes) return "0 B";
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -86,6 +116,7 @@ export default function FileCard({
       toast.error("Login to download files");
       return;
     }
+
     try {
       const res = await api.get(`/files/download/${file._id}`, {
         responseType: "blob",
@@ -129,25 +160,13 @@ export default function FileCard({
       longPressTimer.current = null;
     }
   };
+
   const handleTouchMove = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
   };
-
-  // ---- SKELETON ----
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg animate-pulse overflow-hidden">
-        <div className="aspect-video md:aspect-4/3 bg-linear-to-br from-gray-200 to-gray-300" />
-        <div className="px-3 py-2.5 sm:px-4 sm:py-3 md:p-5 space-y-2 sm:space-y-3">
-          <div className="h-3.5 sm:h-4 bg-gray-200 rounded-lg w-3/4" />
-          <div className="h-3 bg-gray-200 rounded-lg w-1/2" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -185,7 +204,9 @@ export default function FileCard({
                   : "bg-white/95 backdrop-blur-sm border-gray-300 hover:border-blue-400 hover:bg-blue-50"
               }`}
           >
-            {isSelected && <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white stroke-3" />}
+            {isSelected && (
+              <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white stroke-3" />
+            )}
           </div>
         </div>
       )}
@@ -340,7 +361,9 @@ export default function FileCard({
                     : "bg-white border-gray-300"
                 }`}
             >
-              {isSelected && <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white stroke-3" />}
+              {isSelected && (
+                <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white stroke-3" />
+              )}
             </div>
           )}
 
@@ -416,6 +439,7 @@ export default function FileCard({
             <HardDrive className="h-3 w-3 lg:h-3.5 lg:w-3.5" />
             {formatSize(file.size)}
           </span>
+
           <span className="flex items-center gap-1 lg:gap-1.5 px-2 py-0.5 lg:px-2.5 lg:py-1 bg-gray-50 rounded-lg">
             <Calendar className="h-3 w-3 lg:h-3.5 lg:w-3.5" />
             {new Date(file.createdAt).toLocaleDateString("en-US", {
@@ -432,7 +456,6 @@ export default function FileCard({
         open={mobileSheetOpen}
         onClose={() => setMobileSheetOpen(false)}
       >
-        {/* File info header */}
         <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-b border-gray-100">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="p-2.5 sm:p-3 bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl shadow-sm">
@@ -462,7 +485,6 @@ export default function FileCard({
           </div>
         </div>
 
-        {/* Actions */}
         <div className="p-4 sm:p-5 space-y-1.5 sm:space-y-2">
           <button
             onClick={(e) => {
@@ -514,7 +536,9 @@ export default function FileCard({
             </div>
             <div className="flex-1 text-left">
               <p className="font-semibold text-sm sm:text-base">Download</p>
-              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Save to device</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
+                Save to device
+              </p>
             </div>
           </button>
 
@@ -535,12 +559,13 @@ export default function FileCard({
             </div>
             <div className="flex-1 text-left">
               <p className="font-semibold text-sm sm:text-base">Delete</p>
-              <p className="text-[10px] sm:text-xs text-red-400 mt-0.5">Remove permanently</p>
+              <p className="text-[10px] sm:text-xs text-red-400 mt-0.5">
+                Remove permanently
+              </p>
             </div>
           </button>
         </div>
 
-        {/* Cancel */}
         <div className="px-4 sm:px-5 pb-5 sm:pb-6 pt-1 sm:pt-2">
           <button
             onClick={(e) => {
