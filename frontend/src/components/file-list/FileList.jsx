@@ -13,22 +13,26 @@ export default function FileList({
   isDesktop,
 }) {
   if (loading) {
-    return (
-      <div className="mt-4 md:mt-6 animate-in fade-in duration-300">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-500"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <FileCard isLoading />
-            </div>
-          ))}
-        </div>
+  return (
+    <div className="mt-4 md:mt-6 animate-in fade-in duration-300">
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
+      >
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+            style={{ animationDelay: `${i * 50}ms` }}
+          >
+            <FileCard isLoading />
+          </div>
+        ))}
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   if (!files || files.length === 0) {
     return (
