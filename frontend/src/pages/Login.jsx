@@ -1,7 +1,15 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import api from "../api/api";
 
 export default function Login() {
@@ -37,8 +45,21 @@ export default function Login() {
   };
 
   const inputFields = [
-    { name: "email", type: "email", placeholder: "you@example.com", label: "Email Address", icon: Mail },
-    { name: "password", type: showPassword ? "text" : "password", placeholder: "••••••••", label: "Password", icon: Lock, hasToggle: true }
+    {
+      name: "email",
+      type: "email",
+      placeholder: "you@example.com",
+      label: "Email Address",
+      icon: Mail,
+    },
+    {
+      name: "password",
+      type: showPassword ? "text" : "password",
+      placeholder: "••••••••",
+      label: "Password",
+      icon: Lock,
+      hasToggle: true,
+    },
   ];
 
   return (
@@ -46,9 +67,21 @@ export default function Login() {
       {/* Background decorative blobs - Responsive sizes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[
-          { color: "blue", position: "-top-20 -right-20 sm:-top-40 sm:-right-40", delay: "" },
-          { color: "indigo", position: "-bottom-20 -left-20 sm:-bottom-40 sm:-left-40", delay: "animation-delay-2000" },
-          { color: "purple", position: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", delay: "animation-delay-4000" }
+          {
+            color: "blue",
+            position: "-top-20 -right-20 sm:-top-40 sm:-right-40",
+            delay: "",
+          },
+          {
+            color: "indigo",
+            position: "-bottom-20 -left-20 sm:-bottom-40 sm:-left-40",
+            delay: "animation-delay-2000",
+          },
+          {
+            color: "purple",
+            position: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+            delay: "animation-delay-4000",
+          },
         ].map((blob, idx) => (
           <div
             key={idx}
@@ -59,14 +92,6 @@ export default function Login() {
 
       <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
         {/* Header - Responsive text sizes */}
-        <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-xs sm:text-sm md:text-base text-gray-600">
-            Sign in to continue to your account
-          </p>
-        </div>
 
         {/* Form Card - Responsive padding and radius */}
         <form
@@ -77,44 +102,66 @@ export default function Login() {
           {error && (
             <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl flex items-start gap-2 animate-in">
               <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 shrink-0 mt-0.5" />
-              <p className="text-red-800 text-xs sm:text-sm font-medium">{error}</p>
+              <p className="text-red-800 text-xs sm:text-sm font-medium">
+                {error}
+              </p>
             </div>
           )}
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600">
+              Sign in to continue to your account
+            </p>
+          </div>
 
           {/* Input Fields - Responsive spacing and sizes */}
-          {inputFields.map(({ name, type, placeholder, label, icon: Icon, hasToggle }, idx) => (
-            <div key={name} className={idx === inputFields.length - 1 ? "mb-4 sm:mb-5" : "mb-3 sm:mb-4"}>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5">
-                {label}
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
-                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+          {inputFields.map(
+            (
+              { name, type, placeholder, label, icon: Icon, hasToggle },
+              idx,
+            ) => (
+              <div
+                key={name}
+                className={
+                  idx === inputFields.length - 1
+                    ? "mb-4 sm:mb-5"
+                    : "mb-3 sm:mb-4"
+                }
+              >
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5">
+                  {label}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={type}
+                    placeholder={placeholder}
+                    required
+                    value={form[name]}
+                    onChange={handleInputChange(name)}
+                    className={`w-full pl-9 sm:pl-10 ${hasToggle ? "pr-9 sm:pr-10" : "pr-3"} py-2 sm:py-2.5 md:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 bg-white text-xs sm:text-sm`}
+                  />
+                  {hasToggle && (
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-2.5 sm:pr-3 flex items-center hover:cursor-pointer hover:opacity-70 transition-opacity"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                      )}
+                    </button>
+                  )}
                 </div>
-                <input
-                  type={type}
-                  placeholder={placeholder}
-                  required
-                  value={form[name]}
-                  onChange={handleInputChange(name)}
-                  className={`w-full pl-9 sm:pl-10 ${hasToggle ? 'pr-9 sm:pr-10' : 'pr-3'} py-2 sm:py-2.5 md:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 bg-white text-xs sm:text-sm`}
-                />
-                {hasToggle && (
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute inset-y-0 right-0 pr-2.5 sm:pr-3 flex items-center hover:cursor-pointer hover:opacity-70 transition-opacity"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
-                    ) : (
-                      <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
-                    )}
-                  </button>
-                )}
               </div>
-            </div>
-          ))}
+            ),
+          )}
 
           {/* Submit Button - Responsive padding and text */}
           <button

@@ -237,7 +237,7 @@ export default function Home() {
               </p>
             </div>
             
-            <StatsCards files={files} />
+            <StatsCards files={files}  loading={loading} />
           </section>
         )}
 
