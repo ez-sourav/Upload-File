@@ -140,7 +140,7 @@ export default function Home() {
   };
 
   const handleBulkDelete = async () => {
-    const idsToDelete = [...new Set(selectedIds)]; 
+    const idsToDelete = [...new Set(selectedIds)];
 
     // 🔥 VERY IMPORTANT: clear selection first
     setSelectedIds([]);
@@ -211,23 +211,23 @@ export default function Home() {
                   transition-all duration-200
                 "
               >
-                <svg 
-                  className="h-3.5 w-3.5 sm:h-4 sm:w-4" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
+                <svg
+                  className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
                 </svg>
                 <span>Back to Files</span>
               </button>
             )}
-            
+
             <div className="mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1.5 sm:mb-2">
                 File Statistics
@@ -236,8 +236,8 @@ export default function Home() {
                 Overview of your file storage and activity
               </p>
             </div>
-            
-            <StatsCards files={files}  loading={loading} />
+
+            <StatsCards files={files} loading={loading} />
           </section>
         )}
 
@@ -272,7 +272,7 @@ export default function Home() {
         {(!showStats || isDesktop) && (
           <section>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl border border-white/20 p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-5">
-              
+
               {/* Header + Search */}
               <div className="space-y-2  sm:flex sm:items-center sm:justify-between sm:space-y-0">
                 <div className="flex items-center justify-between">
@@ -296,9 +296,8 @@ export default function Home() {
 
                 {files.length > 0 && (
                   <div
-                    className={`relative sm:max-w-xs md:max-w-sm ${
-                      showMobileSearch ? "block" : "hidden sm:block"
-                    }`}
+                    className={`relative sm:max-w-xs md:max-w-sm ${showMobileSearch ? "block" : "hidden sm:block"
+                      }`}
                   >
                     <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                     <input
