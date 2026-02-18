@@ -124,7 +124,7 @@ export default function Register() {
               </p>
             </div>
           )}
-          {/* Header - Responsive text size */}
+          {/* Header - */}
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 text-center">
             Create Account
           </h1>
