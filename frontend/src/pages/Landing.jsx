@@ -50,7 +50,7 @@ export default function Landing() {
           </div>
           <span className="text-base sm:text-xl font-bold text-gray-900">FileManager</span>
         </div>
-        
+
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             to="/login"
