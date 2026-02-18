@@ -105,7 +105,7 @@ export default function UploadZone({
     if (
       type === "application/msword" ||
       type ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       return <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />;
     }
@@ -113,7 +113,7 @@ export default function UploadZone({
     if (
       type === "application/vnd.ms-excel" ||
       type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ) {
       return (
         <FileSpreadsheet className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
@@ -143,15 +143,13 @@ export default function UploadZone({
         onDrop={!isMobile ? onDrop : undefined}
         className={`relative border-2 border-dashed rounded-2xl sm:rounded-3xl
           transition-all duration-300 overflow-hidden
-          ${
-            isDragging && !isMobile
-              ? "border-blue-500 bg-linear-to-br from-blue-50 to-indigo-50 scale-[1.01] shadow-xl shadow-blue-500/20"
-              : "border-gray-300 bg-linear-to-br from-white to-gray-50"
+          ${isDragging && !isMobile
+            ? "border-blue-500 bg-linear-to-br from-blue-50 to-indigo-50 scale-[1.01] shadow-xl shadow-blue-500/20"
+            : "border-gray-300 bg-linear-to-br from-white to-gray-50"
           }
-          ${
-            isUploading
-              ? "opacity-60 pointer-events-none"
-              : "cursor-pointer hover:border-blue-400 hover:shadow-lg"
+          ${isUploading
+            ? "opacity-60 pointer-events-none"
+            : "cursor-pointer hover:border-blue-400 hover:shadow-lg"
           }
         `}
       >
@@ -206,8 +204,8 @@ export default function UploadZone({
                 {isMobile
                   ? "Tap to Upload Files"
                   : isDragging
-                  ? "Drop Your Files Here"
-                  : "Upload Your Files"}
+                    ? "Drop Your Files Here"
+                    : "Upload Your Files"}
               </h3>
 
               {/* Description */}
